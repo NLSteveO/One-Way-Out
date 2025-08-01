@@ -60,6 +60,15 @@ const isWall = (x, y) => {
     return tl === 1 || tr === 1 || bl === 1 || br === 1;
 };
 
+const checkWinCondition = () => {
+    const x1 = Math.floor(rectX / tileSize);
+    const y1 = Math.floor(rectY / tileSize);
+    const x2 = Math.floor((rectX + rectWidth) / tileSize);
+    const y2 = Math.floor((rectY + rectHeight) / tileSize);
+    const player = maze[y1][x1] + maze[y1][x2] + maze[y2][x1] + maze[y2][x2];
+    return player >= 6;    
+}
+
 const gameLoop = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawMaze();
