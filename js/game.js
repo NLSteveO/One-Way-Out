@@ -112,6 +112,19 @@ const gameLoop = () => {
             }
         }
     }
+
+    if (checkWinCondition()) {
+        context.fillStyle = 'black';
+        context.fillRect(0, 130, 125, 50);
+        context.fillStyle = 'white';
+        context.fillRect(5, 135, 115, 40);
+        context.fillStyle = 'black';
+        context.fillRect(10, 140, 105, 30);
+        context.fillStyle = 'white';
+        context.font = '20px Arial';
+        context.fillText('You win!', 15, 165);
+    }
+
     context.fillStyle = 'blue';
     context.fillRect(rectX, rectY, rectWidth, rectHeight);
     requestAnimationFrame(gameLoop);
