@@ -10,6 +10,9 @@ const maze = [
     [1,1,1,1,1]
 ];
 
+const mazeWidth = maze[0].length * tileSize;
+const mazeHeight = maze.length * tileSize;
+
 const drawMaze = () => {
     maze.forEach((row, rowIndex) => {
         row.forEach((cell, cellIndex) => {
@@ -115,14 +118,14 @@ const gameLoop = () => {
 
     if (checkWinCondition()) {
         context.fillStyle = 'black';
-        context.fillRect(0, 130, 125, 50);
+        context.fillRect(0, mazeHeight + 5, 125, 50);
         context.fillStyle = 'white';
-        context.fillRect(5, 135, 115, 40);
+        context.fillRect(5, mazeHeight + 10, 115, 40);
         context.fillStyle = 'black';
-        context.fillRect(10, 140, 105, 30);
+        context.fillRect(10, mazeHeight + 15, 105, 30);
         context.fillStyle = 'white';
         context.font = '20px Arial';
-        context.fillText('You win!', 15, 165);
+        context.fillText('You win!', 15, mazeHeight + 40);
     }
 
     context.fillStyle = 'blue';
