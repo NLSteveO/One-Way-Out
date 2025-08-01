@@ -48,6 +48,18 @@ document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
 });
 
+const isWall = (x, y) => {
+    const x1 = Math.floor(x / tileSize);
+    const y1 = Math.floor(y / tileSize);
+    const x2 = Math.floor((x + rectWidth) / tileSize);
+    const y2 = Math.floor((y + rectHeight) / tileSize);
+    const tl = maze[y1][x1];
+    const tr = maze[y1][x2];
+    const bl = maze[y2][x1];
+    const br = maze[y2][x2];
+    return tl === 1 || tr === 1 || bl === 1 || br === 1;
+};
+
 const gameLoop = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawMaze();
