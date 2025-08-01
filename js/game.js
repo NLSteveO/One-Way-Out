@@ -1,8 +1,34 @@
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext('2d');
 
-let rectX = 100;
-let rectY = 100;
+const tileSize = 25;
+const maze = [
+    [1,1,1,1,1],
+    [1,0,0,0,1],
+    [1,0,1,0,1],
+    [1,0,0,2,1],
+    [1,1,1,1,1]
+];
+
+const drawMaze = () => {
+    maze.forEach((row, rowIndex) => {
+        row.forEach((cell, cellIndex) => {
+            if (cell === 0) {
+                context.fillStyle = 'grey';
+            }
+            if (cell === 1) {
+                context.fillStyle = 'black';
+            }
+            if (cell === 2) {
+                context.fillStyle = 'green';
+            }
+            context.fillRect(cellIndex * tileSize, rowIndex * tileSize, tileSize, tileSize);
+        });
+    });
+};
+
+let rectX = 1 * tileSize;
+let rectY = 1 * tileSize;
 const rectWidth = 15;
 const rectHeight = 15;
 const rectSpeed = 3;
@@ -24,6 +50,7 @@ document.addEventListener('keyup', (event) => {
 
 const gameLoop = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    drawMaze();
     if (keys.w && rectY > 0) {
         rectY -= rectSpeed;
     }
@@ -36,6 +63,7 @@ const gameLoop = () => {
     if (keys.d && rectX + rectWidth < canvas.width) {
         rectX += rectSpeed;
     }
+    context.fillStyle = 'blue';
     context.fillRect(rectX, rectY, rectWidth, rectHeight);
     requestAnimationFrame(gameLoop);
 };
