@@ -64,16 +64,44 @@ const gameLoop = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawMaze();
     if (keys.w && rectY > 0) {
-        rectY -= rectSpeed;
+        for (let i = 0; i < rectSpeed; i++) {
+            const newY = rectY - 1;
+            if (!isWall(rectX, newY)) {
+                rectY = newY;
+            } else {
+                break;
+            }
+        }
     }
     if (keys.a && rectX > 0) {
-        rectX -= rectSpeed;
+        for (let i = 0; i < rectSpeed; i++) {
+            const newX = rectX - 1;
+            if (!isWall(newX, rectY)) {
+                rectX = newX;
+            } else {
+                break;
+            }
+        }
     }
     if (keys.s && rectY + rectHeight < canvas.height) {
-        rectY += rectSpeed;
+        for (let i = 0; i < rectSpeed; i++) {
+            const newY = rectY + 1;
+            if (!isWall(rectX, newY)) {
+                rectY = newY;
+            } else {
+                break;
+            }
+        }
     }
     if (keys.d && rectX + rectWidth < canvas.width) {
-        rectX += rectSpeed;
+        for (let i = 0; i < rectSpeed; i++) {
+            const newX = rectX + 1;
+            if (!isWall(newX, rectY)) {
+                rectX = newX;
+            } else {
+                break;
+            }
+        }
     }
     context.fillStyle = 'blue';
     context.fillRect(rectX, rectY, rectWidth, rectHeight);
