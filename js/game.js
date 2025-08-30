@@ -48,12 +48,61 @@ let keys = {
     d: false,
 };
 
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActive = false;
+const touchDeadZone = 15;
+
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
 });
 
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
+});
+
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    touchStartX = touch.clientX - rect.left;
+    touchStartY = touch.clientY - rect.top;
+    touchActive = true;
+});
+
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    if (!touchActive) return;
+
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const currentX = touch.clientX - rect.left;
+    const currentY = touch.clientY - rect.top;
+
+    const deltaX = currentX - touchStartX;
+    const deltaY = currentY - touchStartY;
+
+    // Reset all movement keys
+    keys.w = keys.a = keys.s = keys.d = false;
+
+    // Check if drag is beyond deadzone
+    if (Math.abs(deltaX) > touchDeadZone || Math.abs(deltaY) > touchDeadZone) {
+        // Determine primary direction
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > touchDeadZone) keys.d = true; // Right
+            if (deltaX < -touchDeadZone) keys.a = true; // Left
+        } else {
+            if (deltaY > touchDeadZone) keys.s = true; // Down
+            if (deltaY < -touchDeadZone) keys.w = true; // Up
+        }
+    }
+});
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    touchActive = false;
+    // Stop all movement when touch ends
+    keys.w = keys.a = keys.s = keys.d = false;
 });
 
 const isWall = (x, y) => {
