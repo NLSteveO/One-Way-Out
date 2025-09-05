@@ -48,6 +48,9 @@ let keys = {
     d: false,
 };
 
+let showTouchControls = false;
+let touchCenterX = 0;
+let touchCenterY = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 let touchActive = false;
@@ -65,8 +68,19 @@ canvas.addEventListener('touchstart', (event) => {
     event.preventDefault();
     const touch = event.touches[0];
     const rect = canvas.getBoundingClientRect();
-    touchStartX = touch.clientX - rect.left;
-    touchStartY = touch.clientY - rect.top;
+
+    // Get raw touch position
+    const rawX = touch.clientX - rect.left;
+    const rawY = touch.clientY - rect.top;
+    
+    // Scale to actual canvas coordinates
+    touchStartX = (rawX / rect.width) * canvas.width;
+    touchStartY = (rawY / rect.height) * canvas.height;
+    
+    // Store for visual feedback
+    touchCenterX = touchStartX;
+    touchCenterY = touchStartY;
+    showTouchControls = true;
     touchActive = true;
 });
 
@@ -76,8 +90,10 @@ canvas.addEventListener('touchmove', (event) => {
 
     const touch = event.touches[0];
     const rect = canvas.getBoundingClientRect();
-    const currentX = touch.clientX - rect.left;
-    const currentY = touch.clientY - rect.top;
+
+    // Scale coordinates
+    const currentX = (touch.clientX - rect.left) / rect.width * canvas.width;
+    const currentY = (touch.clientY - rect.top) / rect.height * canvas.height;
 
     const deltaX = currentX - touchStartX;
     const deltaY = currentY - touchStartY;
@@ -101,9 +117,31 @@ canvas.addEventListener('touchmove', (event) => {
 canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     touchActive = false;
+    showTouchControls = false;
     // Stop all movement when touch ends
     keys.w = keys.a = keys.s = keys.d = false;
 });
+
+const drawTouchControls = () => {
+    if (!showTouchControls) return;
+
+    context.save();
+
+    // Draw deadzone circle
+    context.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(touchCenterX, touchCenterY, touchDeadZone, 0, 2 * Math.PI);
+    context.stroke();
+
+    // Draw center dot
+    context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    context.beginPath();
+    context.arc(touchCenterX, touchCenterY, 4, 0, 2 * Math.PI);
+    context.fill();
+
+    context.restore();
+};
 
 const isWall = (x, y) => {
     const x1 = Math.floor(x / tileSize);
@@ -129,6 +167,7 @@ const checkWinCondition = () => {
 const gameLoop = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawMaze();
+    drawTouchControls();
     if (keys.w && rectY > 0) {
         for (let i = 0; i < rectSpeed; i++) {
             const newY = rectY - 1;
