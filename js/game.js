@@ -39,7 +39,7 @@ let rectX = 1 * tileSize;
 let rectY = 1 * tileSize;
 const rectWidth = 15;
 const rectHeight = 15;
-const rectSpeed = 3;
+let rectSpeed = 0;
 
 let keys = {
     w: false,
@@ -58,10 +58,12 @@ const touchDeadZone = 15;
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
+    rectSpeed = 3;
 });
 
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
+    rectSpeed = 0;
 });
 
 canvas.addEventListener('touchstart', (event) => {
@@ -103,13 +105,28 @@ canvas.addEventListener('touchmove', (event) => {
 
     // Check if drag is beyond deadzone
     if (Math.abs(deltaX) > touchDeadZone || Math.abs(deltaY) > touchDeadZone) {
+        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.1
+        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.1
+
         // Determine primary direction
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (deltaX > touchDeadZone) keys.d = true; // Right
-            if (deltaX < -touchDeadZone) keys.a = true; // Left
+            if (deltaX > touchDeadZone) {
+                keys.d = true; // Right
+                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+            }
+            if (deltaX < -touchDeadZone) {
+                keys.a = true; // Left
+                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+            }   
         } else {
-            if (deltaY > touchDeadZone) keys.s = true; // Down
-            if (deltaY < -touchDeadZone) keys.w = true; // Up
+            if (deltaY > touchDeadZone) {
+                keys.s = true; // Down
+                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+            }
+            if (deltaY < -touchDeadZone) {
+                keys.w = true; // Up
+                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+            }
         }
     }
 });
@@ -120,6 +137,7 @@ canvas.addEventListener('touchend', (e) => {
     showTouchControls = false;
     // Stop all movement when touch ends
     keys.w = keys.a = keys.s = keys.d = false;
+    rectSpeed = 0;
 });
 
 const drawTouchControls = () => {
