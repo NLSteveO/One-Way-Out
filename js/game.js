@@ -1,6 +1,8 @@
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext('2d');
 
+// Game state management
+let gameState = 'start'; // start, playing, finished
 const tileSize = 25;
 const maze = [
     [1,1,1,1,1,1,1,1],
@@ -39,7 +41,7 @@ let rectX = 1 * tileSize;
 let rectY = 1 * tileSize;
 const rectWidth = 15;
 const rectHeight = 15;
-const rectSpeed = 3;
+let rectSpeed = 0;
 
 let keys = {
     w: false,
@@ -48,13 +50,202 @@ let keys = {
     d: false,
 };
 
+let showTouchControls = false;
+let touchCenterX = 0;
+let touchCenterY = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActive = false;
+const touchDeadZone = 15;
+
 document.addEventListener('keydown', (event) => {
+    if (event.key === ' ' && gameState === 'start') {
+        event.preventDefault();
+        updateGameState();
+    }
+    if (event.key === ' ' && gameState === 'finished') {
+        event.preventDefault();
+        updateGameState();
+    }
+
     keys[event.key] = true;
+    if (gameState === 'playing') {
+        rectSpeed = 3;
+    }
 });
 
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
+    rectSpeed = 0;
 });
+
+canvas.addEventListener('touchstart', (event) => {
+    if (gameState === 'start' || gameState === 'finished') {
+        updateGameState();
+        return;
+    }
+    
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+
+    // Get raw touch position
+    const rawX = touch.clientX - rect.left;
+    const rawY = touch.clientY - rect.top;
+    
+    // Scale to actual canvas coordinates
+    touchStartX = (rawX / rect.width) * canvas.width;
+    touchStartY = (rawY / rect.height) * canvas.height;
+    
+    // Store for visual feedback
+    touchCenterX = touchStartX;
+    touchCenterY = touchStartY;
+    showTouchControls = true;
+    touchActive = true;
+});
+
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    if (!touchActive) return;
+
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+
+    // Scale coordinates
+    const currentX = (touch.clientX - rect.left) / rect.width * canvas.width;
+    const currentY = (touch.clientY - rect.top) / rect.height * canvas.height;
+
+    const deltaX = currentX - touchStartX;
+    const deltaY = currentY - touchStartY;
+
+    // Reset all movement keys
+    keys.w = keys.a = keys.s = keys.d = false;
+
+    // Check if drag is beyond deadzone
+    if (Math.abs(deltaX) > touchDeadZone || Math.abs(deltaY) > touchDeadZone) {
+        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.1
+        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.1
+
+        // Determine primary direction
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > touchDeadZone) {
+                keys.d = true; // Right
+                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+            }
+            if (deltaX < -touchDeadZone) {
+                keys.a = true; // Left
+                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+            }   
+        } else {
+            if (deltaY > touchDeadZone) {
+                keys.s = true; // Down
+                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+            }
+            if (deltaY < -touchDeadZone) {
+                keys.w = true; // Up
+                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+            }
+        }
+    }
+});
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    touchActive = false;
+    showTouchControls = false;
+    // Stop all movement when touch ends
+    keys.w = keys.a = keys.s = keys.d = false;
+    rectSpeed = 0;
+});
+
+// Start game input handlers
+const updateGameState = () => {
+    if (gameState === 'start') {
+        gameState = 'playing';
+    } else if (gameState === 'playing') {
+        gameState = 'finished';
+    } else if (gameState === 'finished') {
+        gameState = 'start';
+        rectX = 1 * tileSize;
+        rectY = 1 * tileSize;
+    }
+}
+
+const drawTouchControls = () => {
+    if (!showTouchControls) return;
+
+    context.save();
+
+    // Draw deadzone circle
+    context.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(touchCenterX, touchCenterY, touchDeadZone, 0, 2 * Math.PI);
+    context.stroke();
+
+    // Draw center dot
+    context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    context.beginPath();
+    context.arc(touchCenterX, touchCenterY, 4, 0, 2 * Math.PI);
+    context.fill();
+
+    context.restore();
+};
+
+const drawStartScreen = () => {
+    // Clear canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background (matching maze grey)
+    context.fillStyle = 'grey';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title
+    context.fillStyle = 'black';
+    context.font = 'bold 48px Arial';
+    context.textAlign = 'center';
+    context.fillText('One Way Out', canvas.width / 2, canvas.height / 2 - 60);
+
+    // Subtitle
+    context.font = '24px Arial';
+    context.fillText('Find the one way to escape', canvas.width / 2, canvas.height / 2 - 20);
+
+    // Instructions
+    context.font = '18px Arial';
+    context.fillText('Use WASD or touch controls to move', canvas.width / 2, canvas.height / 2 + 40);
+    
+    // Start prompt (blinking effect)
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        context.fillStyle = 'green';
+        context.font = '22px Arial';
+        context.fillText('Press Space or tap to Start', canvas.width / 2, canvas.height / 2 + 100);
+    }
+
+    context.textAlign = 'left';
+};
+
+const drawFinishScreen = () => {
+    // Clear canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background (matching maze grey)
+    context.fillStyle = 'grey';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title
+    context.fillStyle = 'black';
+    context.font = 'bold 48px Arial';
+    context.textAlign = 'center';
+    context.fillText('You win!', canvas.width / 2, canvas.height / 2 - 60);
+
+    // Restart prompt
+    context.fillStyle = 'green';
+    context.font = '22px Arial';
+    context.fillText('Press Space or tap to Start', canvas.width / 2, canvas.height / 2 + 100);
+
+    context.textAlign = 'left';
+}
+
 
 const isWall = (x, y) => {
     const x1 = Math.floor(x / tileSize);
@@ -78,63 +269,63 @@ const checkWinCondition = () => {
 }
 
 const gameLoop = () => {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    drawMaze();
-    if (keys.w && rectY > 0) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newY = rectY - 1;
-            if (!isWall(rectX, newY)) {
-                rectY = newY;
-            } else {
-                break;
+    if (gameState === 'start') {
+        drawStartScreen();
+    } else if (gameState === 'finished') {
+        drawFinishScreen();
+    } else if (gameState === 'playing') {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        drawTouchControls();
+        if (keys.w && rectY > 0) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newY = rectY - 1;
+                if (!isWall(rectX, newY)) {
+                    rectY = newY;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.a && rectX > 0) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newX = rectX - 1;
-            if (!isWall(newX, rectY)) {
-                rectX = newX;
-            } else {
-                break;
+        if (keys.a && rectX > 0) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newX = rectX - 1;
+                if (!isWall(newX, rectY)) {
+                    rectX = newX;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.s && rectY + rectHeight < canvas.height) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newY = rectY + 1;
-            if (!isWall(rectX, newY)) {
-                rectY = newY;
-            } else {
-                break;
+        if (keys.s && rectY + rectHeight < canvas.height) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newY = rectY + 1;
+                if (!isWall(rectX, newY)) {
+                    rectY = newY;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.d && rectX + rectWidth < canvas.width) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newX = rectX + 1;
-            if (!isWall(newX, rectY)) {
-                rectX = newX;
-            } else {
-                break;
+        if (keys.d && rectX + rectWidth < canvas.width) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newX = rectX + 1;
+                if (!isWall(newX, rectY)) {
+                    rectX = newX;
+                } else {
+                    break;
+                }
             }
         }
+
+        if (checkWinCondition()) {
+            updateGameState();
+        }
+
+        context.fillStyle = 'blue';
+        context.fillRect(rectX, rectY, rectWidth, rectHeight);
     }
 
-    if (checkWinCondition()) {
-        context.fillStyle = 'black';
-        context.fillRect(0, mazeHeight + 5, 125, 50);
-        context.fillStyle = 'white';
-        context.fillRect(5, mazeHeight + 10, 115, 40);
-        context.fillStyle = 'black';
-        context.fillRect(10, mazeHeight + 15, 105, 30);
-        context.fillStyle = 'white';
-        context.font = '20px Arial';
-        context.fillText('You win!', 15, mazeHeight + 40);
-    }
-
-    context.fillStyle = 'blue';
-    context.fillRect(rectX, rectY, rectWidth, rectHeight);
     requestAnimationFrame(gameLoop);
 };
 

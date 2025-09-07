@@ -72,13 +72,32 @@ one-way-out/
 - [x] Movement speed control - Configurable rectSpeed system
 
 ## Potential Next Steps
-- [ ] Add CSS styling
-- [ ] Create larger/multiple mazes
-- [ ] Add restart functionality
-- [ ] Implement sound effects
-- [ ] Add timer/score system
+### Polish and UX
+- [ ] CSS Styling - Make it look more polished with backgrounds, fonts, and borders.
+- [x] Start Screen - Add a title screen with "Press Space to Start"
+- [x] Finish Screen and Restart Button - Let players replay without refreshing
+- [ ] Timer/Score System - Track completion time or moves
+- [x] Mobile Support - Add touch controls for phones/tablets
+- [ ] Touch Control Visual Speed Feedback - Make deadzone circle glow brighter with higher movement speeds
+### Gameplay Expansions
+- [ ] Multiple Levels - Create 3-5 different maze layouts
+- [ ] Larger Mazes - Build more complex, challenging layouts
+- [ ] Player Sprites - Replace blue rectangle with actual character art
+- [ ] Maze Themes - Different visual styles (dungeon, forest, space)
+- [ ] Collectibles - Keys or coins to collect before reaching exit
+### Advanced Features
+- [ ] Procedural Generation - Random maze creation algorithm
+- [ ] Sound Effects - Movement sounds, win music, ambient audio
+- [ ] Enemies/Obstacles - Moving guards or time pressure
+- [ ] Leaderboards - Local storage of best times
+- [ ] Animation Effects - Smooth transitions, particle effects
+### Misc.
+- [ ] Code Organization - Break into classes/modules
+- [ ] Game States - Menu → Playing → Won → Game Over
+- [ ] Local Storage - Save progress/settings
+- [ ] WebGL/Advanced Graphics - Lighting effects, shaders
 
 ---
 *Document started: July 22, 2025*
 
-*Last updated: August 9, 2025*
+*Last updated: September 7, 2025*
