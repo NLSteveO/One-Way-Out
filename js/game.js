@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext('2d');
 
 // Game state management
-let gameState = 'start'; // start, playing
+let gameState = 'start'; // start, playing, finished
 const tileSize = 25;
 const maze = [
     [1,1,1,1,1,1,1,1],
@@ -61,7 +61,11 @@ const touchDeadZone = 15;
 document.addEventListener('keydown', (event) => {
     if (event.key === ' ' && gameState === 'start') {
         event.preventDefault();
-        startGame();
+        updateGameState();
+    }
+    if (event.key === ' ' && gameState === 'finished') {
+        event.preventDefault();
+        updateGameState();
     }
 
     keys[event.key] = true;
@@ -76,8 +80,8 @@ document.addEventListener('keyup', (event) => {
 });
 
 canvas.addEventListener('touchstart', (event) => {
-    if (gameState === 'start') {
-        startGame();
+    if (gameState === 'start' || gameState === 'finished') {
+        updateGameState();
         return;
     }
     
@@ -155,11 +159,17 @@ canvas.addEventListener('touchend', (e) => {
 });
 
 // Start game input handlers
-const startGame = () => {
+const updateGameState = () => {
     if (gameState === 'start') {
         gameState = 'playing';
+    } else if (gameState === 'playing') {
+        gameState = 'finished';
+    } else if (gameState === 'finished') {
+        gameState = 'start';
+        rectX = 1 * tileSize;
+        rectY = 1 * tileSize;
     }
-};
+}
 
 const drawTouchControls = () => {
     if (!showTouchControls) return;
@@ -214,6 +224,28 @@ const drawStartScreen = () => {
     context.textAlign = 'left';
 };
 
+const drawFinishScreen = () => {
+    // Clear canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background (matching maze grey)
+    context.fillStyle = 'grey';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title
+    context.fillStyle = 'black';
+    context.font = 'bold 48px Arial';
+    context.textAlign = 'center';
+    context.fillText('You win!', canvas.width / 2, canvas.height / 2 - 60);
+
+    // Restart prompt
+    context.fillStyle = 'green';
+    context.font = '22px Arial';
+    context.fillText('Press Space or tap to Start', canvas.width / 2, canvas.height / 2 + 100);
+
+    context.textAlign = 'left';
+}
+
 
 const isWall = (x, y) => {
     const x1 = Math.floor(x / tileSize);
@@ -239,6 +271,8 @@ const checkWinCondition = () => {
 const gameLoop = () => {
     if (gameState === 'start') {
         drawStartScreen();
+    } else if (gameState === 'finished') {
+        drawFinishScreen();
     } else if (gameState === 'playing') {
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawMaze();
@@ -285,15 +319,7 @@ const gameLoop = () => {
         }
 
         if (checkWinCondition()) {
-            context.fillStyle = 'black';
-            context.fillRect(0, mazeHeight + 5, 125, 50);
-            context.fillStyle = 'white';
-            context.fillRect(5, mazeHeight + 10, 115, 40);
-            context.fillStyle = 'black';
-            context.fillRect(10, mazeHeight + 15, 105, 30);
-            context.fillStyle = 'white';
-            context.font = '20px Arial';
-            context.fillText('You win!', 15, mazeHeight + 40);
+            updateGameState();
         }
 
         context.fillStyle = 'blue';

@@ -75,7 +75,7 @@ one-way-out/
 ### Polish and UX
 - [ ] CSS Styling - Make it look more polished with backgrounds, fonts, and borders.
 - [x] Start Screen - Add a title screen with "Press Space to Start"
-- [ ] Finish Screen and Restart Button - Let players replay without refreshing
+- [x] Finish Screen and Restart Button - Let players replay without refreshing
 - [ ] Timer/Score System - Track completion time or moves
 - [x] Mobile Support - Add touch controls for phones/tablets
 - [ ] Touch Control Visual Speed Feedback - Make deadzone circle glow brighter with higher movement speeds
@@ -100,4 +100,4 @@ one-way-out/
 ---
 *Document started: July 22, 2025*
 
-*Last updated: August 10, 2025*
+*Last updated: September 7, 2025*
