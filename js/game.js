@@ -21,6 +21,11 @@ const mazeWidth = maze[0].length * tileSize;
 const mazeHeight = maze.length * tileSize;
 
 const drawMaze = () => {
+    // Fill entire canvas with dark background first
+    context.fillStyle = '#2a2a2a';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Then draw the maze on top
     maze.forEach((row, rowIndex) => {
         row.forEach((cell, cellIndex) => {
             if (cell === 0) {
