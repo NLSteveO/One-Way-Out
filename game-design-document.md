@@ -74,10 +74,11 @@ one-way-out/
 ## Potential Next Steps
 ### Polish and UX
 - [ ] CSS Styling - Make it look more polished with backgrounds, fonts, and borders.
-- [ ] Start Screen - Add a title screen with "Press Space to Start"
-- [ ] Restart Button - Let players replay without refreshing
+- [x] Start Screen - Add a title screen with "Press Space to Start"
+- [ ] Finish Screen and Restart Button - Let players replay without refreshing
 - [ ] Timer/Score System - Track completion time or moves
-- [ ] Mobile Support - Add touch controls for phones/tablets
+- [x] Mobile Support - Add touch controls for phones/tablets
+- [ ] Touch Control Visual Speed Feedback - Make deadzone circle glow brighter with higher movement speeds
 ### Gameplay Expansions
 - [ ] Multiple Levels - Create 3-5 different maze layouts
 - [ ] Larger Mazes - Build more complex, challenging layouts

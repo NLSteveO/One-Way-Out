@@ -1,6 +1,8 @@
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext('2d');
 
+// Game state management
+let gameState = 'start'; // start, playing
 const tileSize = 25;
 const maze = [
     [1,1,1,1,1,1,1,1],
@@ -57,8 +59,15 @@ let touchActive = false;
 const touchDeadZone = 15;
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === ' ' && gameState === 'start') {
+        event.preventDefault();
+        startGame();
+    }
+
     keys[event.key] = true;
-    rectSpeed = 3;
+    if (gameState === 'playing') {
+        rectSpeed = 3;
+    }
 });
 
 document.addEventListener('keyup', (event) => {
@@ -67,6 +76,11 @@ document.addEventListener('keyup', (event) => {
 });
 
 canvas.addEventListener('touchstart', (event) => {
+    if (gameState === 'start') {
+        startGame();
+        return;
+    }
+    
     event.preventDefault();
     const touch = event.touches[0];
     const rect = canvas.getBoundingClientRect();
@@ -140,6 +154,13 @@ canvas.addEventListener('touchend', (e) => {
     rectSpeed = 0;
 });
 
+// Start game input handlers
+const startGame = () => {
+    if (gameState === 'start') {
+        gameState = 'playing';
+    }
+};
+
 const drawTouchControls = () => {
     if (!showTouchControls) return;
 
@@ -160,6 +181,39 @@ const drawTouchControls = () => {
 
     context.restore();
 };
+
+const drawStartScreen = () => {
+    // Clear canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background (matching maze grey)
+    context.fillStyle = 'grey';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title
+    context.fillStyle = 'black';
+    context.font = 'bold 48px Arial';
+    context.textAlign = 'center';
+    context.fillText('One Way Out', canvas.width / 2, canvas.height / 2 - 60);
+
+    // Subtitle
+    context.font = '24px Arial';
+    context.fillText('Find the one way to escape', canvas.width / 2, canvas.height / 2 - 20);
+
+    // Instructions
+    context.font = '18px Arial';
+    context.fillText('Use WASD or touch controls to move', canvas.width / 2, canvas.height / 2 + 40);
+    
+    // Start prompt (blinking effect)
+    if (Math.floor(Date.now() / 500) % 2 === 0) {
+        context.fillStyle = 'green';
+        context.font = '22px Arial';
+        context.fillText('Press Space or tap to Start', canvas.width / 2, canvas.height / 2 + 100);
+    }
+
+    context.textAlign = 'left';
+};
+
 
 const isWall = (x, y) => {
     const x1 = Math.floor(x / tileSize);
@@ -183,64 +237,69 @@ const checkWinCondition = () => {
 }
 
 const gameLoop = () => {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    drawMaze();
-    drawTouchControls();
-    if (keys.w && rectY > 0) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newY = rectY - 1;
-            if (!isWall(rectX, newY)) {
-                rectY = newY;
-            } else {
-                break;
+    if (gameState === 'start') {
+        drawStartScreen();
+    } else if (gameState === 'playing') {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawMaze();
+        drawTouchControls();
+        if (keys.w && rectY > 0) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newY = rectY - 1;
+                if (!isWall(rectX, newY)) {
+                    rectY = newY;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.a && rectX > 0) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newX = rectX - 1;
-            if (!isWall(newX, rectY)) {
-                rectX = newX;
-            } else {
-                break;
+        if (keys.a && rectX > 0) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newX = rectX - 1;
+                if (!isWall(newX, rectY)) {
+                    rectX = newX;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.s && rectY + rectHeight < canvas.height) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newY = rectY + 1;
-            if (!isWall(rectX, newY)) {
-                rectY = newY;
-            } else {
-                break;
+        if (keys.s && rectY + rectHeight < canvas.height) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newY = rectY + 1;
+                if (!isWall(rectX, newY)) {
+                    rectY = newY;
+                } else {
+                    break;
+                }
             }
         }
-    }
-    if (keys.d && rectX + rectWidth < canvas.width) {
-        for (let i = 0; i < rectSpeed; i++) {
-            const newX = rectX + 1;
-            if (!isWall(newX, rectY)) {
-                rectX = newX;
-            } else {
-                break;
+        if (keys.d && rectX + rectWidth < canvas.width) {
+            for (let i = 0; i < rectSpeed; i++) {
+                const newX = rectX + 1;
+                if (!isWall(newX, rectY)) {
+                    rectX = newX;
+                } else {
+                    break;
+                }
             }
         }
+
+        if (checkWinCondition()) {
+            context.fillStyle = 'black';
+            context.fillRect(0, mazeHeight + 5, 125, 50);
+            context.fillStyle = 'white';
+            context.fillRect(5, mazeHeight + 10, 115, 40);
+            context.fillStyle = 'black';
+            context.fillRect(10, mazeHeight + 15, 105, 30);
+            context.fillStyle = 'white';
+            context.font = '20px Arial';
+            context.fillText('You win!', 15, mazeHeight + 40);
+        }
+
+        context.fillStyle = 'blue';
+        context.fillRect(rectX, rectY, rectWidth, rectHeight);
     }
 
-    if (checkWinCondition()) {
-        context.fillStyle = 'black';
-        context.fillRect(0, mazeHeight + 5, 125, 50);
-        context.fillStyle = 'white';
-        context.fillRect(5, mazeHeight + 10, 115, 40);
-        context.fillStyle = 'black';
-        context.fillRect(10, mazeHeight + 15, 105, 30);
-        context.fillStyle = 'white';
-        context.font = '20px Arial';
-        context.fillText('You win!', 15, mazeHeight + 40);
-    }
-
-    context.fillStyle = 'blue';
-    context.fillRect(rectX, rectY, rectWidth, rectHeight);
     requestAnimationFrame(gameLoop);
 };
 
