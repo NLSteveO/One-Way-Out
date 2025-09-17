@@ -47,26 +47,48 @@ const maze = [
 const mazeWidth = maze[0].length * tileSize;
 const mazeHeight = maze.length * tileSize;
 
+let cameraX = 0;
+let cameraY = 0;
+
 const drawMaze = () => {
     // Fill entire canvas with dark background first
     context.fillStyle = '#2a2a2a';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Then draw the maze on top
-    maze.forEach((row, rowIndex) => {
-        row.forEach((cell, cellIndex) => {
-            if (cell === 0) {
-                context.fillStyle = 'grey';
+    // calculate which tiles are visible
+    const startTileX = Math.floor(cameraX / tileSize);
+    const startTileY = Math.floor(cameraY / tileSize);
+    const endTileX = Math.ceil((cameraX + canvas.width) / tileSize);
+    const endTileY = Math.ceil((cameraY + canvas.height) / tileSize);
+
+    // Only draw the visible tiles
+    for (let row = startTileY; row < endTileY; row++) {
+        for (let col = startTileX; col < endTileX; col++) {
+            if (maze[row] && maze[row][col] !== undefined) {
+                // Calculate screen position by subtracting camera offset
+                const screenX = (col * tileSize) - cameraX;
+                const screenY = (row * tileSize) - cameraY;
+
+                // Draw tile at screen position
+                if (maze[row][col] === 1) context.fillStyle = 'black';
+                else if (maze[row][col] === 0) context.fillStyle = 'grey';
+                else if (maze[row][col] === 2) context.fillStyle = 'green';
+
+                context.fillRect(screenX, screenY, tileSize, tileSize);
             }
-            if (cell === 1) {
-                context.fillStyle = 'black';
-            }
-            if (cell === 2) {
-                context.fillStyle = 'green';
-            }
-            context.fillRect(cellIndex * tileSize, rowIndex * tileSize, tileSize, tileSize);
-        });
-    });
+        }
+    }
+};
+
+const updateCamera = () => {
+    const maxCameraX = (maze[0].length * tileSize) - canvas.width;
+    const maxCameraY = (maze.length * tileSize) - canvas.height;
+
+    cameraX = rectX - canvas.width / 2;
+    cameraY = rectY - canvas.height / 2;
+
+    cameraX = Math.max(0, Math.min(cameraX, maxCameraX));
+    cameraY = Math.max(0, Math.min(cameraY, maxCameraY));
 };
 
 let rectX = 1 * tileSize;
@@ -300,6 +322,9 @@ const checkWinCondition = () => {
     return player >= 6;    
 }
 
+const mazePixelWidth = maze[0].length * tileSize;
+const mazePixelHeight = maze.length * tileSize;
+
 const gameLoop = () => {
     if (gameState === 'start') {
         drawStartScreen();
@@ -307,8 +332,7 @@ const gameLoop = () => {
         drawFinishScreen();
     } else if (gameState === 'playing') {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawMaze();
-        drawTouchControls();
+
         if (keys.w && rectY > 0) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newY = rectY - 1;
@@ -329,7 +353,7 @@ const gameLoop = () => {
                 }
             }
         }
-        if (keys.s && rectY + rectHeight < canvas.height) {
+        if (keys.s && rectY + rectHeight < mazePixelHeight) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newY = rectY + 1;
                 if (!isWall(rectX, newY)) {
@@ -339,7 +363,7 @@ const gameLoop = () => {
                 }
             }
         }
-        if (keys.d && rectX + rectWidth < canvas.width) {
+        if (keys.d && rectX + rectWidth < mazePixelWidth) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newX = rectX + 1;
                 if (!isWall(newX, rectY)) {
@@ -350,12 +374,17 @@ const gameLoop = () => {
             }
         }
 
+        updateCamera();
+
+        drawMaze();
+        drawTouchControls();
+
         if (checkWinCondition()) {
             updateGameState();
         }
 
         context.fillStyle = 'blue';
-        context.fillRect(rectX, rectY, rectWidth, rectHeight);
+        context.fillRect(rectX - cameraX, rectY - cameraY, rectWidth, rectHeight);
     }
 
     requestAnimationFrame(gameLoop);
