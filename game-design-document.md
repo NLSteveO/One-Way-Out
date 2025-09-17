@@ -84,6 +84,7 @@ one-way-out/
 - [x] Add camera system that follows player
 - [x] Larger Mazes - Build more complex, challenging layouts
 - [x] Scale Maze and Player to work with larger maze and better use camera system.
+- [x] Sprint ability - Allow the player to move slow but precise OR quick and reckless.
 - [ ] Player Sprites - Replace blue rectangle with actual character art
 - [ ] Maze Themes - Different visual styles (dungeon, forest, space)
 - [ ] Collectibles - Keys or coins to collect before reaching exit

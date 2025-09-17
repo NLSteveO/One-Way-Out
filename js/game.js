@@ -97,6 +97,14 @@ const rectWidth = 25;
 const rectHeight = 25;
 let rectSpeed = 0;
 
+// Sprint speed system
+let lastKeyPressed = null;
+let lastKeyPressTime = 0;
+let sprint = false;
+const sprintWindow = 300;
+const walkSpeed = 4;
+const sprintSpeed = 8;
+
 let keys = {
     w: false,
     a: false,
@@ -122,15 +130,29 @@ document.addEventListener('keydown', (event) => {
         updateGameState();
     }
 
-    keys[event.key] = true;
-    if (gameState === 'playing') {
-        rectSpeed = 3;
+    // Sprint direction for movement keys
+    if (['w', 'a', 's', 'd'].includes(event.key)) {
+        const currentTime = Date.now();
+
+        if (event.key === lastKeyPressed && (currentTime - lastKeyPressTime) < sprintWindow && !keys[event.key]) {
+            sprint = true;
+        }
+        lastKeyPressed = event.key;
+        lastKeyPressTime = currentTime;
+
+        // Set speed based on current sprint state
+        rectSpeed = sprint ? sprintSpeed : walkSpeed;
     }
+
+    keys[event.key] = true;
 });
 
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
-    rectSpeed = 0;
+    if (Object.values(keys).every(value => value === false)) {
+        rectSpeed = 0;
+        sprint = false;
+    }
 });
 
 canvas.addEventListener('touchstart', (event) => {
@@ -177,27 +199,27 @@ canvas.addEventListener('touchmove', (event) => {
 
     // Check if drag is beyond deadzone
     if (Math.abs(deltaX) > touchDeadZone || Math.abs(deltaY) > touchDeadZone) {
-        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.1
-        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.1
+        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.2
+        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.2
 
         // Determine primary direction
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX > touchDeadZone) {
                 keys.d = true; // Right
-                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+                rectSpeed = xSpeed < sprintSpeed ? xSpeed : sprintSpeed;
             }
             if (deltaX < -touchDeadZone) {
                 keys.a = true; // Left
-                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+                rectSpeed = xSpeed < sprintSpeed ? xSpeed : sprintSpeed;
             }   
         } else {
             if (deltaY > touchDeadZone) {
                 keys.s = true; // Down
-                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+                rectSpeed = ySpeed < sprintSpeed ? ySpeed : sprintSpeed;
             }
             if (deltaY < -touchDeadZone) {
                 keys.w = true; // Up
-                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+                rectSpeed = ySpeed < sprintSpeed ? ySpeed : sprintSpeed;
             }
         }
     }
