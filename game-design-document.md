@@ -83,6 +83,7 @@ one-way-out/
 - [ ] Multiple Levels - Create 3-5 different maze layouts
 - [x] Add camera system that follows player
 - [x] Larger Mazes - Build more complex, challenging layouts
+- [x] Scale Maze and Player to work with larger maze and better use camera system.
 - [ ] Player Sprites - Replace blue rectangle with actual character art
 - [ ] Maze Themes - Different visual styles (dungeon, forest, space)
 - [ ] Collectibles - Keys or coins to collect before reaching exit

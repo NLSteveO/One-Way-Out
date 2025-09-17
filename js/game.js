@@ -3,7 +3,7 @@ const context = canvas.getContext('2d');
 
 // Game state management
 let gameState = 'start'; // start, playing, finished
-const tileSize = 25;
+const tileSize = 100;
 // const maze = [
 //     [1,1,1,1,1,1,1,1],
 //     [1,0,0,0,0,0,0,1],
@@ -93,8 +93,8 @@ const updateCamera = () => {
 
 let rectX = 1 * tileSize;
 let rectY = 1 * tileSize;
-const rectWidth = 15;
-const rectHeight = 15;
+const rectWidth = 25;
+const rectHeight = 25;
 let rectSpeed = 0;
 
 let keys = {
