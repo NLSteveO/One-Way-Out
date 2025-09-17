@@ -3,45 +3,107 @@ const context = canvas.getContext('2d');
 
 // Game state management
 let gameState = 'start'; // start, playing, finished
-const tileSize = 25;
+const tileSize = 100;
+// const maze = [
+//     [1,1,1,1,1,1,1,1],
+//     [1,0,0,0,0,0,0,1],
+//     [1,0,1,0,1,1,1,1],
+//     [1,0,1,0,0,0,0,1],
+//     [1,1,1,0,1,1,1,1],
+//     [1,0,1,0,1,2,0,1],
+//     [1,0,0,0,1,1,0,1],
+//     [1,1,1,0,0,1,0,1],
+//     [1,0,0,0,0,0,0,1],
+//     [1,1,1,1,1,1,1,1]
+// ];
 const maze = [
-    [1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,1],
-    [1,0,1,0,1,1,1,1],
-    [1,0,1,0,0,0,0,1],
-    [1,1,1,0,1,1,1,1],
-    [1,0,1,0,1,2,0,1],
-    [1,0,0,0,1,1,0,1],
-    [1,1,1,0,0,1,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1]
+    // Row 0: Top border
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    // Row 1: Entrance and initial paths
+    [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+    [1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1],
+    [1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1],
+    // Row 5: Mid-section with branching
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+    [1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
+    // Row 10: Middle maze with open areas
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+    [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1],
+    [1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+    [1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1,0,1],
+    // Row 15: Lower section leading to exit
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1],
+    [1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,2,1], // Exit at (23,18)
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  // Bottom border
 ];
 
 const mazeWidth = maze[0].length * tileSize;
 const mazeHeight = maze.length * tileSize;
 
+let cameraX = 0;
+let cameraY = 0;
+
 const drawMaze = () => {
-    maze.forEach((row, rowIndex) => {
-        row.forEach((cell, cellIndex) => {
-            if (cell === 0) {
-                context.fillStyle = 'grey';
+    // Fill entire canvas with dark background first
+    context.fillStyle = '#2a2a2a';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // calculate which tiles are visible
+    const startTileX = Math.floor(cameraX / tileSize);
+    const startTileY = Math.floor(cameraY / tileSize);
+    const endTileX = Math.ceil((cameraX + canvas.width) / tileSize);
+    const endTileY = Math.ceil((cameraY + canvas.height) / tileSize);
+
+    // Only draw the visible tiles
+    for (let row = startTileY; row < endTileY; row++) {
+        for (let col = startTileX; col < endTileX; col++) {
+            if (maze[row] && maze[row][col] !== undefined) {
+                // Calculate screen position by subtracting camera offset
+                const screenX = (col * tileSize) - cameraX;
+                const screenY = (row * tileSize) - cameraY;
+
+                // Draw tile at screen position
+                if (maze[row][col] === 1) context.fillStyle = 'black';
+                else if (maze[row][col] === 0) context.fillStyle = 'grey';
+                else if (maze[row][col] === 2) context.fillStyle = 'green';
+
+                context.fillRect(screenX, screenY, tileSize, tileSize);
             }
-            if (cell === 1) {
-                context.fillStyle = 'black';
-            }
-            if (cell === 2) {
-                context.fillStyle = 'green';
-            }
-            context.fillRect(cellIndex * tileSize, rowIndex * tileSize, tileSize, tileSize);
-        });
-    });
+        }
+    }
+};
+
+const updateCamera = () => {
+    const maxCameraX = (maze[0].length * tileSize) - canvas.width;
+    const maxCameraY = (maze.length * tileSize) - canvas.height;
+
+    cameraX = rectX - canvas.width / 2;
+    cameraY = rectY - canvas.height / 2;
+
+    cameraX = Math.max(0, Math.min(cameraX, maxCameraX));
+    cameraY = Math.max(0, Math.min(cameraY, maxCameraY));
 };
 
 let rectX = 1 * tileSize;
 let rectY = 1 * tileSize;
-const rectWidth = 15;
-const rectHeight = 15;
+const rectWidth = 25;
+const rectHeight = 25;
 let rectSpeed = 0;
+
+// Sprint speed system
+let lastKeyPressed = null;
+let lastKeyPressTime = 0;
+let sprint = false;
+const sprintWindow = 300;
+const walkSpeed = 4;
+const sprintSpeed = 8;
 
 let keys = {
     w: false,
@@ -68,15 +130,29 @@ document.addEventListener('keydown', (event) => {
         updateGameState();
     }
 
-    keys[event.key] = true;
-    if (gameState === 'playing') {
-        rectSpeed = 3;
+    // Sprint direction for movement keys
+    if (['w', 'a', 's', 'd'].includes(event.key)) {
+        const currentTime = Date.now();
+
+        if (event.key === lastKeyPressed && (currentTime - lastKeyPressTime) < sprintWindow && !keys[event.key]) {
+            sprint = true;
+        }
+        lastKeyPressed = event.key;
+        lastKeyPressTime = currentTime;
+
+        // Set speed based on current sprint state
+        rectSpeed = sprint ? sprintSpeed : walkSpeed;
     }
+
+    keys[event.key] = true;
 });
 
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
-    rectSpeed = 0;
+    if (Object.values(keys).every(value => value === false)) {
+        rectSpeed = 0;
+        sprint = false;
+    }
 });
 
 canvas.addEventListener('touchstart', (event) => {
@@ -123,27 +199,27 @@ canvas.addEventListener('touchmove', (event) => {
 
     // Check if drag is beyond deadzone
     if (Math.abs(deltaX) > touchDeadZone || Math.abs(deltaY) > touchDeadZone) {
-        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.1
-        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.1
+        const xSpeed = Math.round((Math.abs(deltaX) - touchDeadZone) / 5) * 0.2
+        const ySpeed = Math.round((Math.abs(deltaY) - touchDeadZone) / 5) * 0.2
 
         // Determine primary direction
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX > touchDeadZone) {
                 keys.d = true; // Right
-                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+                rectSpeed = xSpeed < sprintSpeed ? xSpeed : sprintSpeed;
             }
             if (deltaX < -touchDeadZone) {
                 keys.a = true; // Left
-                rectSpeed = xSpeed < 3 ? xSpeed : 3;
+                rectSpeed = xSpeed < sprintSpeed ? xSpeed : sprintSpeed;
             }   
         } else {
             if (deltaY > touchDeadZone) {
                 keys.s = true; // Down
-                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+                rectSpeed = ySpeed < sprintSpeed ? ySpeed : sprintSpeed;
             }
             if (deltaY < -touchDeadZone) {
                 keys.w = true; // Up
-                rectSpeed = ySpeed < 3 ? ySpeed : 3;
+                rectSpeed = ySpeed < sprintSpeed ? ySpeed : sprintSpeed;
             }
         }
     }
@@ -268,6 +344,9 @@ const checkWinCondition = () => {
     return player >= 6;    
 }
 
+const mazePixelWidth = maze[0].length * tileSize;
+const mazePixelHeight = maze.length * tileSize;
+
 const gameLoop = () => {
     if (gameState === 'start') {
         drawStartScreen();
@@ -275,8 +354,7 @@ const gameLoop = () => {
         drawFinishScreen();
     } else if (gameState === 'playing') {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        drawMaze();
-        drawTouchControls();
+
         if (keys.w && rectY > 0) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newY = rectY - 1;
@@ -297,7 +375,7 @@ const gameLoop = () => {
                 }
             }
         }
-        if (keys.s && rectY + rectHeight < canvas.height) {
+        if (keys.s && rectY + rectHeight < mazePixelHeight) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newY = rectY + 1;
                 if (!isWall(rectX, newY)) {
@@ -307,7 +385,7 @@ const gameLoop = () => {
                 }
             }
         }
-        if (keys.d && rectX + rectWidth < canvas.width) {
+        if (keys.d && rectX + rectWidth < mazePixelWidth) {
             for (let i = 0; i < rectSpeed; i++) {
                 const newX = rectX + 1;
                 if (!isWall(newX, rectY)) {
@@ -318,12 +396,17 @@ const gameLoop = () => {
             }
         }
 
+        updateCamera();
+
+        drawMaze();
+        drawTouchControls();
+
         if (checkWinCondition()) {
             updateGameState();
         }
 
         context.fillStyle = 'blue';
-        context.fillRect(rectX, rectY, rectWidth, rectHeight);
+        context.fillRect(rectX - cameraX, rectY - cameraY, rectWidth, rectHeight);
     }
 
     requestAnimationFrame(gameLoop);

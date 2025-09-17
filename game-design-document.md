@@ -81,7 +81,10 @@ one-way-out/
 - [ ] Touch Control Visual Speed Feedback - Make deadzone circle glow brighter with higher movement speeds
 ### Gameplay Expansions
 - [ ] Multiple Levels - Create 3-5 different maze layouts
-- [ ] Larger Mazes - Build more complex, challenging layouts
+- [x] Add camera system that follows player
+- [x] Larger Mazes - Build more complex, challenging layouts
+- [x] Scale Maze and Player to work with larger maze and better use camera system.
+- [x] Sprint ability - Allow the player to move slow but precise OR quick and reckless.
 - [ ] Player Sprites - Replace blue rectangle with actual character art
 - [ ] Maze Themes - Different visual styles (dungeon, forest, space)
 - [ ] Collectibles - Keys or coins to collect before reaching exit
@@ -93,11 +96,11 @@ one-way-out/
 - [ ] Animation Effects - Smooth transitions, particle effects
 ### Misc.
 - [ ] Code Organization - Break into classes/modules
-- [ ] Game States - Menu → Playing → Won → Game Over
+- [x] Game States - Menu → Playing → Won → Game Over
 - [ ] Local Storage - Save progress/settings
 - [ ] WebGL/Advanced Graphics - Lighting effects, shaders
 
 ---
 *Document started: July 22, 2025*
 
-*Last updated: September 7, 2025*
+*Last updated: September 16, 2025*

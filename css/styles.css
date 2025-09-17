@@ -2,30 +2,31 @@ body {
     margin: 0;
     padding: 20px;
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #1a1a1a;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    color: #fff;
 }
 
 h1 {
     margin: 0 0 20px 0;
-    color: #333;
+    color: #fff;
 }
 
 #gameCanvas {
-    border: 2px solid #333;
-    background-color: #fff;
-    max-width: 100%;
-    max-height: 70vh;
+    border: 2px solid #444;
+    background-color: #2a2a2a;
+    max-width: 95vw;
+    max-height: 80vh;
     width: 800px;
     height: 600px;
 }
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 5px;
     }
 
     h1 {
@@ -34,7 +35,8 @@ h1 {
     }
 
     #gameCanvas {
-        max-width: 60vh;
+        max-width: 98vh;
+        max-height: 85vh;
         width: 100%;
         height: auto;
     }
