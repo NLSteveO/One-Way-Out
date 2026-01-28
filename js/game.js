@@ -76,7 +76,10 @@ const bowringMaze = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // Bottom border
 ];
 
-const maze = bowringMaze;
+const mazes = [ initialMaze, secondMaze, bowringMaze ];
+let currentMaze = 0;
+
+let maze = mazes[currentMaze];
 
 const mazeWidth = maze[0].length * tileSize;
 const mazeHeight = maze.length * tileSize;
@@ -370,16 +373,30 @@ const isWall = (x, y) => {
 };
 
 const checkWinCondition = () => {
+    if (checkEndOfMaze() && currentMaze === mazes.length - 1) return true;
+    if (checkEndOfMaze() && currentMaze < mazes.length - 1) {
+        currentMaze++;
+        maze = mazes[currentMaze];
+        rectX = 1 * tileSize;
+        rectY = 1 * tileSize;
+        mazePixelWidth = maze[0].length * tileSize;
+        mazePixelHeight = maze.length * tileSize;
+        return false;
+    }
+    return false;
+};
+
+const checkEndOfMaze = () => {
     const x1 = Math.floor(rectX / tileSize);
     const y1 = Math.floor(rectY / tileSize);
     const x2 = Math.floor((rectX + rectWidth) / tileSize);
     const y2 = Math.floor((rectY + rectHeight) / tileSize);
     const player = maze[y1][x1] + maze[y1][x2] + maze[y2][x1] + maze[y2][x2];
     return player >= 6;    
-}
+};
 
-const mazePixelWidth = maze[0].length * tileSize;
-const mazePixelHeight = maze.length * tileSize;
+let mazePixelWidth = maze[0].length * tileSize;
+let mazePixelHeight = maze.length * tileSize;
 
 const gameLoop = () => {
     if (gameState === 'start') {

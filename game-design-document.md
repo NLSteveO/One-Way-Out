@@ -81,6 +81,9 @@ one-way-out/
 - [ ] Touch Control Visual Speed Feedback - Make deadzone circle glow brighter with higher movement speeds
 ### Gameplay Expansions
 - [ ] Multiple Levels - Create 3-5 different maze layouts
+  - [x] Add Bowring Park maze
+  - [x] Allow user to go through all the current mazes in sequence
+  - [ ] Add more mazes
 - [x] Add camera system that follows player
 - [x] Larger Mazes - Build more complex, challenging layouts
 - [x] Scale Maze and Player to work with larger maze and better use camera system.
@@ -103,4 +106,4 @@ one-way-out/
 ---
 *Document started: July 22, 2025*
 
-*Last updated: September 16, 2025*
+*Last updated: January 28, 2026*
