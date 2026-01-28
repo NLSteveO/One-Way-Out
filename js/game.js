@@ -279,8 +279,13 @@ const updateGameState = () => {
         gameState = 'finished';
     } else if (gameState === 'finished') {
         gameState = 'start';
+        currentMaze = 0;
+        maze = mazes[currentMaze];
         rectX = 1 * tileSize;
         rectY = 1 * tileSize;
+        mazePixelWidth = maze[0].length * tileSize;
+        mazePixelHeight = maze.length * tileSize;
+        updateLevelDisplay();
     }
 }
 
@@ -372,15 +377,39 @@ const isWall = (x, y) => {
     return tl === 1 || tr === 1 || bl === 1 || br === 1;
 };
 
+const updateLevelDisplay = () => {
+    const levelDisplay = document.getElementById('levelDisplay');
+    levelDisplay.textContent = `Level: ${currentMaze + 1} / ${mazes.length}`;
+};
+
+const nextMaze = () => {
+    if (currentMaze >= mazes.length - 1) return;
+    currentMaze++;
+    maze = mazes[currentMaze];
+    rectX = 1 * tileSize;
+    rectY = 1 * tileSize;
+    mazePixelWidth = maze[0].length * tileSize;
+    mazePixelHeight = maze.length * tileSize;
+    updateLevelDisplay();
+};
+
+// TODO: Implement previous maze functionality
+// Allow user to go back to previous maze
+const previousMaze = () => {
+    if (currentMaze <= 0) return;
+    currentMaze--;
+    maze = mazes[currentMaze];
+    rectX = 1 * tileSize;
+    rectY = 1 * tileSize;
+    mazePixelWidth = maze[0].length * tileSize;
+    mazePixelHeight = maze.length * tileSize;
+    updateLevelDisplay();
+};
+
 const checkWinCondition = () => {
     if (checkEndOfMaze() && currentMaze === mazes.length - 1) return true;
     if (checkEndOfMaze() && currentMaze < mazes.length - 1) {
-        currentMaze++;
-        maze = mazes[currentMaze];
-        rectX = 1 * tileSize;
-        rectY = 1 * tileSize;
-        mazePixelWidth = maze[0].length * tileSize;
-        mazePixelHeight = maze.length * tileSize;
+        nextMaze();
         return false;
     }
     return false;
@@ -397,6 +426,7 @@ const checkEndOfMaze = () => {
 
 let mazePixelWidth = maze[0].length * tileSize;
 let mazePixelHeight = maze.length * tileSize;
+updateLevelDisplay();
 
 const gameLoop = () => {
     if (gameState === 'start') {
