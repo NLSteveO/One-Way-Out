@@ -14,7 +14,7 @@ A browser-based maze puzzle game where you must find the single path to escape! 
 2. Open `index.html` in any modern web browser
 3. Start playing immediately - no installation required!
 
-<!-- **Or play online:** [Live Demo](https://YOUR_USERNAME.github.io/one-way-out) -->
+**Or play online:** [Live Demo](http://steveokeefe.ca/One-Way-Out)
 
 ## 🛠️ Built With
 
