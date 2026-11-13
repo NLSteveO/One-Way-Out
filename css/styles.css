@@ -15,6 +15,17 @@ h1 {
     color: #fff;
 }
 
+#gameInfo {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 5px 5px 0 0;
+    max-width: 95vw;
+    width: 780px;
+}
+
 #gameCanvas {
     border: 2px solid #444;
     background-color: #2a2a2a;
@@ -35,7 +46,7 @@ h1 {
     }
 
     #gameCanvas {
-        max-width: 98vh;
+        max-width: 98vw;
         max-height: 85vh;
         width: 100%;
         height: auto;

@@ -4,19 +4,21 @@ const context = canvas.getContext('2d');
 // Game state management
 let gameState = 'start'; // start, playing, finished
 const tileSize = 100;
-// const maze = [
-//     [1,1,1,1,1,1,1,1],
-//     [1,0,0,0,0,0,0,1],
-//     [1,0,1,0,1,1,1,1],
-//     [1,0,1,0,0,0,0,1],
-//     [1,1,1,0,1,1,1,1],
-//     [1,0,1,0,1,2,0,1],
-//     [1,0,0,0,1,1,0,1],
-//     [1,1,1,0,0,1,0,1],
-//     [1,0,0,0,0,0,0,1],
-//     [1,1,1,1,1,1,1,1]
-// ];
-const maze = [
+
+const initialMaze = [
+    [1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,1,0,1,1,1,1],
+    [1,0,1,0,0,0,0,1],
+    [1,1,1,0,1,1,1,1],
+    [1,0,1,0,1,2,0,1],
+    [1,0,0,0,1,1,0,1],
+    [1,1,1,0,0,1,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1]
+];
+
+const secondMaze = [
     // Row 0: Top border
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     // Row 1: Entrance and initial paths
@@ -43,6 +45,41 @@ const maze = [
     [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,2,1], // Exit at (23,18)
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  // Bottom border
 ];
+
+const bowringMaze = [
+    // Row 0: Top border
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    // Row 1: Entrance
+    [1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1],
+    // Row 5
+    [1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+    [1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1],
+    [1,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    // Row 10
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
+    [1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,1],
+    [1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1],
+    // Row 15
+    [1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1],
+    [1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1],
+    [1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,1], // Exit at (23,19)
+    // Row 20
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // Bottom border
+];
+
+const mazes = [ initialMaze, secondMaze, bowringMaze ];
+let currentMaze = 0;
+
+let maze = mazes[currentMaze];
 
 const mazeWidth = maze[0].length * tileSize;
 const mazeHeight = maze.length * tileSize;
@@ -242,8 +279,13 @@ const updateGameState = () => {
         gameState = 'finished';
     } else if (gameState === 'finished') {
         gameState = 'start';
+        currentMaze = 0;
+        maze = mazes[currentMaze];
         rectX = 1 * tileSize;
         rectY = 1 * tileSize;
+        mazePixelWidth = maze[0].length * tileSize;
+        mazePixelHeight = maze.length * tileSize;
+        updateLevelDisplay();
     }
 }
 
@@ -335,17 +377,56 @@ const isWall = (x, y) => {
     return tl === 1 || tr === 1 || bl === 1 || br === 1;
 };
 
+const updateLevelDisplay = () => {
+    const levelDisplay = document.getElementById('levelDisplay');
+    levelDisplay.textContent = `Level: ${currentMaze + 1} / ${mazes.length}`;
+};
+
+const nextMaze = () => {
+    if (currentMaze >= mazes.length - 1) return;
+    currentMaze++;
+    maze = mazes[currentMaze];
+    rectX = 1 * tileSize;
+    rectY = 1 * tileSize;
+    mazePixelWidth = maze[0].length * tileSize;
+    mazePixelHeight = maze.length * tileSize;
+    updateLevelDisplay();
+};
+
+// TODO: Implement previous maze functionality
+// Allow user to go back to previous maze
+const previousMaze = () => {
+    if (currentMaze <= 0) return;
+    currentMaze--;
+    maze = mazes[currentMaze];
+    rectX = 1 * tileSize;
+    rectY = 1 * tileSize;
+    mazePixelWidth = maze[0].length * tileSize;
+    mazePixelHeight = maze.length * tileSize;
+    updateLevelDisplay();
+};
+
 const checkWinCondition = () => {
+    if (checkEndOfMaze() && currentMaze === mazes.length - 1) return true;
+    if (checkEndOfMaze() && currentMaze < mazes.length - 1) {
+        nextMaze();
+        return false;
+    }
+    return false;
+};
+
+const checkEndOfMaze = () => {
     const x1 = Math.floor(rectX / tileSize);
     const y1 = Math.floor(rectY / tileSize);
     const x2 = Math.floor((rectX + rectWidth) / tileSize);
     const y2 = Math.floor((rectY + rectHeight) / tileSize);
     const player = maze[y1][x1] + maze[y1][x2] + maze[y2][x1] + maze[y2][x2];
     return player >= 6;    
-}
+};
 
-const mazePixelWidth = maze[0].length * tileSize;
-const mazePixelHeight = maze.length * tileSize;
+let mazePixelWidth = maze[0].length * tileSize;
+let mazePixelHeight = maze.length * tileSize;
+updateLevelDisplay();
 
 const gameLoop = () => {
     if (gameState === 'start') {
